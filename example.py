@@ -41,19 +41,26 @@ def hemi_pocket(x0, y0, r):
     # Clearance height
     print('G01 Z{:.4f}'.format(CLEAR))
     radius_step = 1/16
-    for r in step_range(0, r, radius_step):
-        hemi_shell(x0, y0, r)
+    for r in step_range(0, r - radius_step, radius_step):
+        hemi_shell(x0, y0, r, radius_step)
+    hemi_shell(x0, y0, r, radius_step/2)
+    hemi_shelly(x0, y0, r, radius_step/2)
     # We want to be safe again
     print('G00 Z{:.4f}'.format(SAFE))
 
 
-def hemi_shell(x0, y0, r):
-    radius_step = 1/16
+def hemi_shell(x0, y0, r, radius_step=1/16):
     print('; Cut shell for radius', r)
     for x in step_range(-r, r, radius_step):
         arc_r = math.sqrt(r*r - x*x)
         hemi_arc(x0 + x, y0, arc_r)
 
+
+def hemi_shelly(x0, y0, r, radius_step=1/16):
+    print('; Cut shell for radius', r)
+    for y in step_range(-r, r, radius_step):
+        arc_r = math.sqrt(r*r - y*y)
+        hemi_arcy(x0, y0 + y, arc_r)
 
 def hemi_arc(x0, y0, r):
     # Go to clearance height just for safety
@@ -71,10 +78,26 @@ def hemi_arc(x0, y0, r):
     # Return to clearance height
     print('G00 Z{:.4f}'.format(CLEAR))
 
+
+def hemi_arcy(x0, y0, r):
+    # Go to clearance height just for safety
+    print('; Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
+    print('G00 Z{:.4f}'.format(CLEAR))
+    # The correct plane
+    print('G18')
+    # The initial point above the top of the arc
+    print('G00 X{:.4f} Y{:.4f}'.format(x0 - r, y0))
+    # Touch the surface
+    print('G01 Z0')
+    # Cut an arc centered along the horizontal diameter of a circle, cutting
+    # down to the bottom point of the circle.
+    print('G02 I{:.4f} K0 X{:.4f}'.format(r, x0 + r))
+    # Return to clearance height
+    print('G00 Z{:.4f}'.format(CLEAR))
+
 print('''
-G20 G90 D200 G40; Inch units. Absolute mode. Activate tool offset. Deactivate tool nose radius compensation.
-G50 S2000
-G96 S854 M03
-F.05
+G20 G90 ; Inch units. Absolute mode.
+D200 G40 ; Activate tool offset. Deactivate tool nose radius compensation.
+G94 S2000 M03 F8
 ''')
 hemi_pocket(0, 0, 0.5)
