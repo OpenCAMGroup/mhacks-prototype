@@ -46,7 +46,7 @@ class IrregularLinearPattern(Pattern):
             spacings     = args[1]
             super().__init__(geometry, initialPoint)
             self.positions = []
-            
+
             cumuSpacings = [[0,0]]
             cumuSpacings.extend(self.toCumulative(spacings))
             for pos in pattern.positions:

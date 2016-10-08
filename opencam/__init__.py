@@ -1,4 +1,4 @@
-from Materials import InsulationFoam
+from .materials import InsulationFoam
 
 class Machine:
     def __init__(self):

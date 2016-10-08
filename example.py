@@ -1,7 +1,7 @@
-import OpenCAM as oc
-import Materials as mat
-import Geometry as geo
-import Patterns as pat
+import opencam as oc
+import opencam.materials as mat
+import opencam.geometry as geo
+import opencam.patterns as pat
 
 mach = oc.Machine()
 mach.material = mat.InsulationFoam
