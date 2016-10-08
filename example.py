@@ -34,70 +34,129 @@ CLEAR = 0.2
 
 
 def hemi_pocket(x0, y0, r):
-    # Start seeking at the safe height
-    print('G00 Z{:.4f}'.format(SAFE))
-    # Move to the center of the pocket
-    print('G00 X{:.4f} Y{:.4f}'.format(x0, y0))
-    # Clearance height
-    print('G01 Z{:.4f}'.format(CLEAR))
+    result = (gcode_goto({'z': SAFE}, fast=True) +
+              gcode_goto((x0, y0), fast=True) +
+              gcode_goto({'z': CLEAR}))
+
     radius_step = 1/16
-    for r in step_range(0, r - radius_step, radius_step):
-        hemi_shell(x0, y0, r, radius_step)
-    hemi_shell(x0, y0, r, radius_step/2)
-    hemi_shelly(x0, y0, r, radius_step/2)
+    for r0 in step_range(0, r - radius_step, radius_step):
+        result += hemi_shell(x0, y0, r0, radius_step)
+    # Do the fine grained smoothing step along both axes
+    result += hemi_shell(x0, y0, r, radius_step/2)
+    result += hemi_shelly(x0, y0, r, radius_step/2)
     # We want to be safe again
-    print('G00 Z{:.4f}'.format(SAFE))
+    return result + gcode_goto({'z': SAFE})
 
 
 def hemi_shell(x0, y0, r, radius_step=1/16):
-    print('; Cut shell for radius', r)
+    result = gcode_comment('Cut shell for radius ' + str(r))
     for x in step_range(-r, r, radius_step):
         arc_r = math.sqrt(r*r - x*x)
-        hemi_arc(x0 + x, y0, arc_r)
+        result += hemi_arc(x0 + x, y0, arc_r)
+    return result
 
 
 def hemi_shelly(x0, y0, r, radius_step=1/16):
-    print('; Cut shell for radius', r)
+    result = gcode_comment('Cut shell for radius ' + str(r))
     for y in step_range(-r, r, radius_step):
         arc_r = math.sqrt(r*r - y*y)
-        hemi_arcy(x0, y0 + y, arc_r)
+        result += hemi_arcy(x0, y0 + y, arc_r)
+    return result
 
 def hemi_arc(x0, y0, r):
     # Go to clearance height just for safety
-    print('; Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
-    print('G00 Z{:.4f}'.format(CLEAR))
-    # The correct plane
-    print('G19')
-    # The initial point above the top of the arc
-    print('G00 X{:.4f} Y{:.4f}'.format(x0, y0 + r))
-    # Touch the surface
-    print('G01 Z0')
-    # Cut an arc centered along the horizontal diameter of a circle, cutting
-    # down to the bottom point of the circle.
-    print('G02 J{:.4f} K0 Y{:.4f}'.format(-r, y0 - r))
-    # Return to clearance height
-    print('G00 Z{:.4f}'.format(CLEAR))
+    return (gcode_comment('Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
+            + gcode_goto({'z': CLEAR}, fast=True)
+            + gcode_goto((x0, y0 + r), fast=True)
+            + gcode_arc(start={'z': 0}, end={'y': y0 - r},
+                        center={'y': -r, 'z': 0}, plane='yz')
+            + gcode_goto({'z': CLEAR}))
 
 
 def hemi_arcy(x0, y0, r):
     # Go to clearance height just for safety
-    print('; Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
-    print('G00 Z{:.4f}'.format(CLEAR))
-    # The correct plane
-    print('G18')
-    # The initial point above the top of the arc
-    print('G00 X{:.4f} Y{:.4f}'.format(x0 - r, y0))
-    # Touch the surface
-    print('G01 Z0')
-    # Cut an arc centered along the horizontal diameter of a circle, cutting
-    # down to the bottom point of the circle.
-    print('G02 I{:.4f} K0 X{:.4f}'.format(r, x0 + r))
-    # Return to clearance height
-    print('G00 Z{:.4f}'.format(CLEAR))
+    return (gcode_comment('Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
+            + gcode_goto({'z': CLEAR}, fast=True)
+            + gcode_goto((x0 - r, y0), fast=True)
+            + gcode_arc(start={'z': 0}, end={'x': x0 + r},
+                        center={'x': r, 'z': 0}, plane='xz')
+            + gcode_goto({'z': CLEAR}, fast=True))
+
+
+def gcode_comment(string):
+    return [{'type': 'comment', 'comment': string}]
+
+
+def gcode_goto(point, fast=False):
+    return [{'type': 'goto', 'point': point, 'fast': fast}]
+
+
+def gcode_arc(start, end, center, plane='xy', clockwise=True):
+    return ([{'type': 'plane', 'plane': plane}]
+            + gcode_goto(start)
+            + [{'type': 'arc', 'center': center, 'end': end, 'clockwise': clockwise}])
+
+def normalize_position(pos):
+    if isinstance(pos, tuple):
+        if len(pos) == 2:
+            x, y = pos
+            return {'x': x, 'y': y}
+        elif len(pos) == 3:
+            x, y, z = pos
+            return {'x': x, 'y': y, 'z': z}
+        else:
+            assert 2 <= len(pos) <= 3
+    else:
+        return pos
+
+
+def format_block(block):
+    ty = block['type']
+    if ty == 'comment':
+        return '; ' + block['comment']
+    elif ty == 'goto':
+        pos = normalize_position(block['point'])
+        if block['fast']:
+            G = 'G00 '
+        else:
+            G = 'G01 '
+        positions = []
+        for key in 'xyz':
+            if key in pos:
+                positions.append('{}{}'.format(key.upper(), round(pos[key], 4)))
+        return G + ' '.join(positions)
+    elif ty == 'plane':
+        Gs = {'xy': 'G17', 'xz': 'G18', 'yz': 'G19'}
+        return Gs[block['plane']]
+    elif ty == 'arc':
+        if block['clockwise']:
+            G = 'G02'
+        else:
+            G = 'G03'
+        end = normalize_position(block['end'])
+        ends = []
+        for key in 'xyz':
+            if key in end:
+                ends.append('{}{}'.format(key.upper(), round(end[key], 4)))
+        center = normalize_position(block['center'])
+        centers = []
+        for key, name in zip('xyz', 'IJK'):
+            if key in center:
+                centers.append('{}{}'.format(name, round(center[key], 4)))
+        return '{} {} {}'.format(G, ' '.join(centers), ' '.join(ends))
+    else:
+        print('Unexpected block', block)
+        assert False
+
+
+def print_blocks(blocks):
+    for block in blocks:
+        print(format_block(block))
+
 
 print('''
 G20 G90 ; Inch units. Absolute mode.
 D200 G40 ; Activate tool offset. Deactivate tool nose radius compensation.
 G94 S2000 M03 F8
 ''')
-hemi_pocket(0, 0, 0.5)
+print_blocks(hemi_pocket(0, 0, 0.5))
