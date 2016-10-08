@@ -47,9 +47,9 @@ class GCode(object):
 
 
 class Goto(GCode):
-    def __init__(self, pos, fast=False):
+    def __init__(self, pos, fast=False, feed=None):
         super().__init__(self)
-        self.pos, self.fast = pos, fast
+        self.pos, self.fast, self.feed = pos, fast, feed
 
     def gcode(self):
         pos = normalize_position(self.pos)
@@ -61,7 +61,10 @@ class Goto(GCode):
         for key in 'xyz':
             if key in pos:
                 positions.append('{}{}'.format(key.upper(), round(pos[key], 4)))
-        return [G + ' '.join(positions)]
+        feed = ''
+        if self.feed:
+            feed = ' F{:.01f}'.format(self.feed)
+        return [G + ' '.join(positions) + feed]
 
 
 class Comment(GCode):
@@ -70,7 +73,7 @@ class Comment(GCode):
         self.message = message
 
     def gcode(self):
-        return ['; ' + self.message]
+        return ['({})'.format(self.message)]
 
 
 class Arc(GCode):
@@ -97,6 +100,7 @@ class Arc(GCode):
             if key in center:
                 centers.append('{}{}'.format(name, round(center[key], 4)))
         gcode.append('{} {} {}'.format(G, ' '.join(centers), ' '.join(ends)))
+
         return gcode
 
 

@@ -23,7 +23,7 @@ CLEAR = 0.2
 
 
 def hemi_pocket(x0, y0, r):
-    result = (gcode.Goto({'z': SAFE}, fast=True) +
+    result = (gcode.Goto({'z': SAFE}, fast=True, feed=70) +
               gcode.Goto((x0, y0), fast=True) +
               gcode.Goto({'z': CLEAR}))
 
@@ -41,6 +41,9 @@ def hemi_shell(x0, y0, r, radius_step=1/16):
     result = gcode.Comment('Cut shell for radius ' + str(r))
     for x in step_range(r, -r, radius_step):
         arc_r = math.sqrt(r*r - x*x)
+        # Cutting zero-radius arcs are silly
+        if arc_r < 0.01:
+            continue
         result += hemi_arc(x0 + x, y0, arc_r)
     return result
 
@@ -49,6 +52,9 @@ def hemi_shelly(x0, y0, r, radius_step=1/16):
     result = gcode.Comment('Cut shell for radius ' + str(r))
     for y in step_range(r, -r, radius_step):
         arc_r = math.sqrt(r*r - y*y)
+        # Cutting zero-radius arcs are silly
+        if arc_r < 0.01:
+            continue
         result += hemi_arcy(x0, y0 + y, arc_r)
     return result
 
@@ -78,10 +84,19 @@ def print_blocks(blocks):
     for block in blocks:
         print('\n'.join(block.gcode()))
 
-
-print('''
-G20 G90 ; Inch units. Absolute mode.
-D200 G40 ; Activate tool offset. Deactivate tool nose radius compensation.
-G94 S8000 M03 F70
+print('''\
+%
+(T1  D=0.125 CR=0.015 - ZMIN=-1. - BULLNOSE END MILL)
+G90 G94 G17
+G20
+T1 M6
+G54
+S8000 M3
 ''')
-print_blocks(hemi_pocket(0, 0, 0.5))
+data = hemi_pocket(0, 0, 0.5)
+data += gcode.Goto({'z': CLEAR}, fast=True)
+print_blocks(data)
+print('''
+G28
+M30
+% ''')
