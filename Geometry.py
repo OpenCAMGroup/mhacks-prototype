@@ -14,6 +14,19 @@ class Circle(Geometry):
         self.radius = radius
         return super().__init__()
 
+class Polygon(Geometry):
+    def __init__(self, positions):
+        self.positions = positions
+        return super().__init__()
+
+    def printPolygon(self):
+        result = (gcode.Goto({'z':gcode.SAFE}, fast=True) + gcode.Spindle(True))
+
+        for pos in positions:
+            result +=  gcode.Goto({'x' : pos[0], 'y' : pos[1]}, fast = False)
+
+        result += (gcode.Goto({'z':gcode.SAFE}, fast=True) + gcode.Spindle(False))
+
 class Drill(Geometry):
     def __init__(self, cutDepth):
         self.cutDepth = cutDepth
