@@ -16,7 +16,7 @@ class Machine:
     def setSFM(self, val = None):
         self.overriddenSFM = val
 
-    def submit(self,  workpiece):
+    def submit(self, workpiece):
         return
 
 
