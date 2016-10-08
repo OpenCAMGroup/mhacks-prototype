@@ -1,3 +1,5 @@
+import gcode
+
 class Geometry:
     def __init__(self):
         return
@@ -18,15 +20,13 @@ class Drill(Geometry):
         return super().__init__()
 
     def printDrills(self, positions, toolHeight):
-        # Assuming G90 (absolute positioning) and that Z1. is a safe position
-        print("G43 H{} Z1.".format(toolHeight))
-        print("G00 X{} Y{} S2000 M3;".format(positions[0][0], positions[0][1]))
-        print("G01 Z{} F8;\nZ{};".format(-self.cutDepth-1, self.cutDepth+1))
-        for x in range(1,len(positions)):
-            print("G00 X{} Y{};\nG01 Z{};\nZ{};".format(positions[x][0], positions[x][1], -self.cutDepth-1, self.cutDepth+1))
-        print("M05 G49 Z1.;")
+        result = (gcode.Goto({'z':gcode.SAFE}, fast=True) + gcode.Spindle(True))
 
+        # Assuming G90 (absolute positioning)
+        for pos in positions:
+            result += gcode.Goto({'x' : pos[0], 'y' : pos[1]}, fast = True)
+            result += gcode.Goto({'z' : -self.cutDepth}, fast = False)
+            result += gcode.Goto({'z' : gcode.SAFE}, fast = False)
 
-def printStart():
-    print("O1 CustomBuiltProgramByOpenCAM")
-    print("G90 G54;")
+        result += gcode.Spindle(False)
+        return result

@@ -3,6 +3,10 @@ import Materials as mat
 import Geometry as geo
 import Patterns as pat
 
+def print_blocks(blocks):
+    for block in blocks:
+        print('\n'.join(block.gcode()))
+
 mach = oc.Machine()
 mach.material = mat.InsulationFoam
 mach.tool = 'Carbide'
@@ -18,6 +22,6 @@ pat2 = pat.IrregularLinearPattern(c1, [0,0], [[1,1], [2,1], [3,1]])
 pat3 = pat.RegularLinearPattern(pat1, 3, [0,1])
 pat4 = pat.IrregularLinearPattern(pat1, [[0,1], [1,1], [2,2]])
 
-geo.printStart()
 d = geo.Drill(1.5)
-d.printDrills(pat.RectHolePattern([0,0], [6,6]), 0.5)
+blocks = d.printDrills(pat.RectHolePattern([0,0], [6,6]), 0.5)
+print_blocks(blocks)
