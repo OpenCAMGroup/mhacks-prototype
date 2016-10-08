@@ -9,7 +9,7 @@ def step_range(start, end, step):
     assert step != 0
 
     delta = end - start
-    n_steps = math.ceil(delta / step)
+    n_steps = math.ceil(abs(delta) / step)
     if n_steps == 0:
         yield start
         return
@@ -39,7 +39,7 @@ def hemi_pocket(x0, y0, r):
 
 def hemi_shell(x0, y0, r, radius_step=1/16):
     result = gcode.Comment('Cut shell for radius ' + str(r))
-    for x in step_range(-r, r, radius_step):
+    for x in step_range(r, -r, radius_step):
         arc_r = math.sqrt(r*r - x*x)
         result += hemi_arc(x0 + x, y0, arc_r)
     return result
@@ -47,7 +47,7 @@ def hemi_shell(x0, y0, r, radius_step=1/16):
 
 def hemi_shelly(x0, y0, r, radius_step=1/16):
     result = gcode.Comment('Cut shell for radius ' + str(r))
-    for y in step_range(-r, r, radius_step):
+    for y in step_range(r, -r, radius_step):
         arc_r = math.sqrt(r*r - y*y)
         result += hemi_arcy(x0, y0 + y, arc_r)
     return result
@@ -56,9 +56,10 @@ def hemi_arc(x0, y0, r):
     # Go to clearance height just for safety
     return (gcode.Comment('Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
             + gcode.Goto({'z': CLEAR}, fast=True)
-            + gcode.Goto((x0, y0 + r), fast=True)
-            + gcode.Arc(start={'z': 0}, end={'y': y0 - r},
-                        center={'y': -r, 'z': 0}, plane='yz')
+            + gcode.Goto((x0, y0 - r), fast=True)
+            + gcode.Arc(start={'z': 0}, end={'y': y0 + r},
+                        center={'y': r, 'z': 0}, plane='yz',
+                        clockwise=False)
             + gcode.Goto({'z': CLEAR}))
 
 
@@ -66,9 +67,10 @@ def hemi_arcy(x0, y0, r):
     # Go to clearance height just for safety
     return (gcode.Comment('Cut arc at x = {:.4f} radius {:.4f}'.format(x0, r))
             + gcode.Goto({'z': CLEAR}, fast=True)
-            + gcode.Goto((x0 - r, y0), fast=True)
-            + gcode.Arc(start={'z': 0}, end={'x': x0 + r},
-                        center={'x': r, 'z': 0}, plane='xz')
+            + gcode.Goto((x0 + r, y0), fast=True)
+            + gcode.Arc(start={'z': 0}, end={'x': x0 - r},
+                        center={'x': -r, 'z': 0}, plane='xz',
+                        clockwise=False)
             + gcode.Goto({'z': CLEAR}, fast=True))
 
 
@@ -80,6 +82,6 @@ def print_blocks(blocks):
 print('''
 G20 G90 ; Inch units. Absolute mode.
 D200 G40 ; Activate tool offset. Deactivate tool nose radius compensation.
-G94 S2000 M03 F8
+G94 S8000 M03 F70
 ''')
 print_blocks(hemi_pocket(0, 0, 0.5))
