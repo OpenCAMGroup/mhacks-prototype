@@ -4,6 +4,7 @@ class Pattern:
         self.positions = [initialPoint]
         self.geometry = geometry
 
+
 class RegularLinearPattern(Pattern):
     # sometimes I wish python had function overloading
     # true inputs: numPoints, e.g. 5
@@ -28,6 +29,7 @@ class RegularLinearPattern(Pattern):
             spacing      = args[3]
             super().__init__(geometry, initialPoint)
             self.positions = [[initialPoint[i] + (x) * spacing[i] for i in range(2)] for x in range(numPoints+1)]
+
 
 class IrregularLinearPattern(Pattern):
     def toCumulative(self, spacings):

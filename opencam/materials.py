@@ -3,4 +3,4 @@ class Material:
         self.SFM = {}
 
 InsulationFoam = Material()
-InsulationFoam.SFM = {'Carbide':100, 'HSS':200}
+InsulationFoam.SFM = {'Carbide': 100, 'HSS': 200}
