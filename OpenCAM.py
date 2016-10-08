@@ -2,9 +2,9 @@ from Materials import InsulationFoam
 
 class Machine:
     def __init__(self):
-        self.workpiece = None
-        self.material = InsulationFoam
-        self.tool = 'Carbide'
+        self.curWorkpiece = None
+        self.material = None # example: InsulationFoam
+        self.tool = None # example: 'Carbide'
         self.overriddenSFM = None
 
     def getSFM(self):
@@ -15,6 +15,10 @@ class Machine:
 
     def setSFM(self, val = None):
         self.overriddenSFM = val
+
+    def submit(self,  workpiece):
+        return
+
 
 class Workpiece:
     def __init__(self):
