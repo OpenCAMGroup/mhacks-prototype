@@ -63,8 +63,7 @@ class IrregularLinearPattern(Pattern):
                 self.positions.append([initialPoint[i] + spacing[i] for i in range(2)])
 
 
-                
 def RectHolePattern(pos, cornerVector):
     # pos example: [1,1]
     # cornerVector example: [5,4]
-    return [pos[i] + arrangement[i] * cornerVector[i] for arrangement in [[0,0], [1,0], [1,1], [0,1]] for i in range(2)]
+    return [[pos[i] + arrangement[i] * cornerVector[i] for i in range(2)] for arrangement in [[0,0], [1,0], [1,1], [0,1]]]
