@@ -20,4 +20,4 @@ pat4 = pat.IrregularLinearPattern(pat1, [[0,1], [1,1], [2,2]])
 
 
 geo.printStart()
-geo.printDrills(pat.RectHolePattern([0,0], [1,1]), 0.5, 1.5)
+geo.printDrills(pat.RectHolePattern([0,0], [6,6]), 0.5, 1.5)

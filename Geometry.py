@@ -13,7 +13,7 @@ class Circle(Geometry):
         return super().__init__()
 
 def printStart():
-    print("O1 Custom Built Program by OpenCAM")
+    print("O1 CustomBuiltProgramByOpenCAM")
     print("G90 G54;")
 
 def printDrills(positions, cutDepth, toolHeight):
