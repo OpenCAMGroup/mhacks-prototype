@@ -1,5 +1,12 @@
 from .materials import InsulationFoam
 
+
+def print_blocks(data):
+    print('%')
+    print('\n'.join(data.gcode()))
+    print('%')
+
+
 class Machine:
     def __init__(self):
         self.curWorkpiece = None

@@ -52,9 +52,10 @@ def profile_cut(corner0, corner1, depth, step=inch(1/4), tool_diameter=inch(1/8)
             + gcode.Goto((x0, y0), fast=True)
             + gcode.Goto({'z': CLEAR}, fast=True))
     n_steps = math.ceil(depth / step)
-    for i in range(n_steps + 1):
+    for i in range(1, n_steps + 1):
         t = i / n_steps
         result += (gcode.Goto({'z': -depth * t})
+                   + gcode.Goto((x0, y0))
                    + gcode.Goto((x0, y1))
                    + gcode.Goto((x1, y1))
                    + gcode.Goto((x1, y0))
