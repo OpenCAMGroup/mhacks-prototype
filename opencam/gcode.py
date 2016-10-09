@@ -167,7 +167,10 @@ class Comment(Command):
 class Arc(Command):
     def __init__(self, start, center, end, plane=XY_PLANE, clockwise=True):
         super().__init__(self)
-        self.start, self.center, self.end = start, center, end
+
+        self.start = normalize_position(start)
+        self.center = normalize_position(center)
+        self.end = normalize_position(end)
         self.plane, self.clockwise = plane, clockwise
 
     def gcode(self):
@@ -192,11 +195,12 @@ class Arc(Command):
         return gcode
 
     def translated(self, x=0, y=0, z=0):
-        return Arc(translate_pos(self.start, x, y, z),
-                  self.center,
-                   translate_pos(self.end, x, y, z),
+        new_arc = Arc(start=translate_pos(self.start, x, y, z),
+                   center=self.center,
+                   end=translate_pos(self.end, x, y, z),
                    plane=self.plane,
                    clockwise=self.clockwise)
+        return new_arc
 
     def rotated(self, x=0, y=0, z=0):
         assert x % 90 == 0 and y % 90 == 0 and z % 90 == 0
@@ -204,9 +208,9 @@ class Arc(Command):
         clockwise = self.clockwise
         if counter < 0:
             clockwise = not self.clockwise
-        return Arc(rotate_pos(self.start, x, y, z),
-                   rotate_pos(self.center, x, y, z),
-                   rotate_pos(self.end, x, y, z),
+        return Arc(start=rotate_pos(self.start, x, y, z),
+                   center=rotate_pos(self.center, x, y, z),
+                   end=rotate_pos(self.end, x, y, z),
                    plane=plane, clockwise=clockwise)
 
 

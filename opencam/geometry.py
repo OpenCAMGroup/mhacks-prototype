@@ -1,4 +1,5 @@
 from . import gcode
+from .command import Command
 
 class Geometry(Command):
     pass
