@@ -21,14 +21,13 @@ def step_range(start, end, step):
 
 
 def hemi_pocket(r, radius_step=1/16):
-    result = (gcode.Goto({'z': SAFE}, fast=True, feed=70) +
+    result = (gcode.Comment('Cut hemispherical pocket with radius ' + str(r)) +
+              gcode.Goto({'z': SAFE}, fast=True, feed=70) +
               gcode.Goto((0, 0), fast=True) +
               gcode.Goto({'z': CLEAR}))
-
-    radius_step = 1/16
-    for r0 in step_range(0, r - radius_step, radius_step):
+    for r0 in step_range(0, r - radius_step, radius_step*2):
         result += hemi_shell(r0, radius_step)
-    # Do the fine grained smoothing step along both axes
+    # Do the fine grained sm othing step along both axes
     surfacing_shell = hemi_shell(r, radius_step/2)
     result += surfacing_shell
     result += surfacing_shell.rotated(z=90)

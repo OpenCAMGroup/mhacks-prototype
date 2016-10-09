@@ -24,8 +24,10 @@ def regular_polygon(item, n=5, r=1):
 
 
 def polystar(n=5, r=1, t=2):
-    result = (gcode.Goto({'z': CLEAR}, fast=True)
+    result = (gcode.Comment('Polystar with ' + str(n) + ' sides')
+              + gcode.Goto({'z': SAFE}, fast=True)
               + gcode.Goto((r, 0), fast=True)
+              + gcode.Goto({'z': CLEAR})
               + gcode.Goto({'z': -0.1}))
     for i in range(n+1):
         angle = i / n * 2 * math.pi
@@ -48,10 +50,10 @@ S8000 M3
 ''')
 
 N_SIDES = 7
-data += hemisphere.hemi_pocket(0.5)
+data += hemisphere.hemi_pocket(0.7)
 pocket = hemisphere.hemi_pocket(0.3)
-data += regular_polygon(pocket, 7, 2)
-data += polystar(7, 2)
+data += regular_polygon(pocket, 7, r=2)
+data += polystar(7, r=2)
 data += gcode.Goto({'z': CLEAR})
 data += gcode.Raw('''
 G28
