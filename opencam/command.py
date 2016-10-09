@@ -24,6 +24,8 @@ class Command(object):
         return self.b
 
     def gcode(self):
+        if self.b is None:
+            return self.a.gcode()
         return self.a.gcode() + self.b.gcode()
 
     def translated(self, x=0, y=0, z=0):

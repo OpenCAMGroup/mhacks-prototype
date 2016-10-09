@@ -30,6 +30,7 @@ def translate_pos(pos, x=0, y=0, z=0):
         result['z'] = pos['z'] + z
     return result
 
+
 def rotate_pos(pos, x=0, y=0, z=0):
     assert x % 90 == 0 and y % 90 == 0 and z % 90 == 0
 
@@ -84,6 +85,20 @@ class Raw(Command):
 
     def rotated(self, *args):
         return Raw(self.code)
+
+
+class Empty(Command):
+    def __init__(self):
+        super().__init__(self)
+
+    def gcode(self):
+        return []
+
+    def translated(self, *args):
+        return Empty()
+
+    def rotated(self, *args):
+        return Empty()
 
 
 class Goto(Command):
