@@ -2,6 +2,7 @@ import opencam
 import opencam.gcode as gcode
 import hemisphere
 import ellipsoid
+import actions
 import math
 
 CLEAR = 0.2
@@ -30,9 +31,13 @@ G54
 S8000 M3
 ''')
 
+N_SIDES = 9
 data += gcode.Goto({'z': SAFE}, fast=True, feed=70)
 data += hemisphere.hemi_pocket(0.4)
-data += flower(inner_r=0.6, outer_r=1.5, depth=0.2, n=9)
+data += flower(inner_r=0.6, outer_r=1.5, depth=0.2, n=N_SIDES)
+data += actions.at_points(
+    actions.drill_hole(1),
+    actions.regular_polygon(N_SIDES, r=1))
 
 data += gcode.Raw('''
 G28

@@ -30,11 +30,11 @@ drill_points = [(mm(20), mm(20)),
                 (mm(160), mm(100)),
                 (mm(20), mm(100))]
 cylinder = actions.bore_cylinder(r=mm(5), depth=mm(5), tool_diameter=inch(1/8))
-hole = actions.drill_hole(depth=inch(0.75))
+hole = actions.drill_hole(depth=inch(1))
 
 data += gcode.Goto({'z': SAFE}, fast=True, feed=70)
-# data += hemisphere.hemi_pocket(mm(20)).translated(x=mm(90), y=mm(60))
-# data += actions.at_points(cylinder + hole, drill_points)
+data += hemisphere.hemi_pocket(mm(20)).translated(x=mm(90), y=mm(60))
+data += actions.at_points(cylinder + hole, drill_points)
 data += actions.profile_cut((mm(0), mm(0)), (mm(180), mm(120)),
                             depth=inch(1), tool_diameter=inch(1/8))
 

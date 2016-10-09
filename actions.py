@@ -32,13 +32,16 @@ def bore_cylinder(r, depth, tool_diameter=inch(1/8), step=1/16):
 
 
 def drill_hole(depth):
-    return (gcode.Comment("Drill hole depth={}".format(depth))
-            + gcode.Goto({'z': SAFE}, fast=True)
-            + gcode.Goto((0, 0), fast=True)
-            + gcode.Goto({'z': CLEAR}, fast=True)
-            + gcode.Goto({'z': -depth})
-            + gcode.Goto({'z': CLEAR})
-            + gcode.Goto({'z': SAFE}, fast=True))
+    result = (gcode.Comment("Drill hole depth={}".format(depth))
+              + gcode.Goto({'z': SAFE}, fast=True)
+              + gcode.Goto((0, 0), fast=True)
+              + gcode.Goto({'z': CLEAR}, fast=True))
+    for i in range(21):
+        t = i / 20
+        result += gcode.Goto({'z': -t * depth})
+    result += (gcode.Goto({'z': CLEAR})
+               + gcode.Goto({'z': SAFE}, fast=True))
+    return result
 
 
 def profile_cut(corner0, corner1, depth, step=inch(1/4), tool_diameter=inch(1/8)):
@@ -68,3 +71,8 @@ def at_points(geom, points):
         result += geom.translated(x=x, y=y)
     return result
 
+
+def regular_polygon(n, r=1):
+    for i in range(n):
+        angle = i / n * math.pi * 2
+        yield r * math.cos(angle), r * math.sin(angle)
