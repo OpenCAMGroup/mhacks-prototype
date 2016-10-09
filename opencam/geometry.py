@@ -1,23 +1,25 @@
 from . import gcode
 
-class Geometry:
-    def __init__(self):
-        return
+class Geometry(Command):
+    pass
 
 class Line(Geometry):
-    def __init__(self, vect=[0,0]):
+    def __init__(self, vect=(0,0)):
+        super().__init__(self)
         self.vect = vect
-        return super().__init__()
+
+    def compile(self, position):
+        pass
 
 class Circle(Geometry):
     def __init__(self, radius = 0):
+        super().__init__(self)
         self.radius = radius
-        return super().__init__()
 
 class Polygon(Geometry):
     def __init__(self, positions):
+        super().__init__(self)
         self.positions = positions
-        return super().__init__()
 
     def printPolygon(self):
         result = (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(True))
@@ -26,11 +28,12 @@ class Polygon(Geometry):
             result +=  gcode.Goto({'x': pos[0], 'y': pos[1]}, fast = False)
 
         result += (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(False))
+        return result
 
 class Drill(Geometry):
     def __init__(self, cutDepth):
+        super().__init__(self)
         self.cutDepth = cutDepth
-        return super().__init__()
 
     def printDrills(self, positions, toolHeight):
         result = (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(True))
