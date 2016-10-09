@@ -4,7 +4,6 @@ import math
 
 import opencam.gcode as gcode
 
-
 def step_range(start, end, step):
     assert step != 0
 

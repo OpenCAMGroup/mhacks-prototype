@@ -2,6 +2,8 @@ XY_PLANE = 'xy'
 XZ_PLANE = 'xz'
 YZ_PLANE = 'yz'
 
+SAFE = 1
+
 
 def normalize_position(pos):
     if isinstance(pos, tuple):
@@ -65,6 +67,18 @@ class Goto(GCode):
         if self.feed:
             feed = ' F{:.01f}'.format(self.feed)
         return [G + ' '.join(positions) + feed]
+
+
+class Spindle(GCode):
+    def __init__(self, turn):
+        super().__init__(self)
+        self.turn = turn
+
+    def gcode(self):
+        if self.turn == True:
+            return ['S8000 M3']
+        else:
+            return ['M5']
 
 
 class Comment(GCode):
