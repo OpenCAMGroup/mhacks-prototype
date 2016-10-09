@@ -23,6 +23,7 @@ class StdOutListener(StreamListener):
     def on_data(self, data):
         try:
             decoded = json.loads(data) 
+            print(decoded)
             text = decoded["text"]
             twoWords = ' '.join(re.findall("\w+", text)[:2])
             if len(twoWords) < 15:
