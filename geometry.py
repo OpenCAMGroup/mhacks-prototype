@@ -20,15 +20,16 @@ class Polygon(Geometry):
         self.depth = depth
         return super().__init__()
 
-    def printPolygon(self):
-        result = (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(True))
+    def printPolygon(self, initPoint = (0,0)):
+        result = (gcode.Goto({'z': gcode.SAFE}, fast=True))
+        result += ( gcode.Goto({'x': self.positions[0][0]+initPoint[0], 'y': self.positions[0][1]+initPoint[1]}, fast = True) )
+        result += ( gcode.Goto({'z': -self.depth}, fast = False, feed = 50  ) )
 
-        for pos in self.positions:
-            result += ( gcode.Goto({'z': -self.depth}, fast = False, feed = 50  ) )
-            result += ( gcode.Goto({'x': pos[0], 'y': pos[1]}, fast = False) )
-            result += ( gcode.Goto({'z': gcode.SAFE}, fast = False))
-
-        result += (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(False))
+        for pos in self.positions[1:]:
+            result += ( gcode.Goto({'x': pos[0]+initPoint[0], 'y': pos[1]+initPoint[1]}, fast = False) )
+            
+        result += (gcode.Goto({'z': gcode.SAFE}, fast = False))
+        result += (gcode.Goto({'z': gcode.SAFE}, fast=True))
         return result
 
 class Drill(Geometry):
@@ -36,7 +37,7 @@ class Drill(Geometry):
         self.cutDepth = cutDepth
         return super().__init__()
 
-    def printDrills(self, positions, toolHeight):
+    def printDrills(self, positions):
         result = (gcode.Goto({'z': gcode.SAFE}, fast=True) + gcode.Spindle(True))
 
         # Assuming G90 (absolute positioning)

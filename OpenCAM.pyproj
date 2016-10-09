@@ -26,6 +26,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="example2.py" />
+    <Compile Include="example4.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="gcode.py" />
     <Compile Include="geometry.py" />
     <Compile Include="ListenToTweets.py">
@@ -36,9 +39,11 @@
     </Compile>
     <Compile Include="materials.py" />
     <Compile Include="patterns.py" />
+    <Compile Include="translate.py" />
     <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bigjohn.pkl" />
     <Content Include="svg.pkl" />
   </ItemGroup>
   <PropertyGroup>

@@ -5,6 +5,7 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 import re
 import json
+from translate import translate_string
 
 # Go to http://apps.twitter.com and create an app.
 # The consumer key and secret will be generated for you after
@@ -23,11 +24,10 @@ class StdOutListener(StreamListener):
     def on_data(self, data):
         try:
             decoded = json.loads(data) 
-            print(decoded)
-            text = decoded["text"]
-            twoWords = ' '.join(re.findall("\w+", text)[:2])
-            if len(twoWords) < 15:
-                print(twoWords)
+            #print(decoded)
+            text = decoded['user']["screen_name"]
+            print('@'+text+' - '+decoded["text"])
+            translate_string('@'+text, 7)
             return True
         except:
             pass
@@ -41,4 +41,4 @@ if __name__ == '__main__':
     auth.set_access_token(access_token, access_token_secret)
 
     stream = Stream(auth, l)
-    stream.filter(track=['michigan'])
+    stream.filter(track=['opencam'])
